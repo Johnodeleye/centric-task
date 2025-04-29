@@ -60,7 +60,7 @@ export default function CreateTask() {
       console.log("Task created:", formData);
       setIsSubmitting(false);
       // Redirect to task feed after creation
-      router.push("/tasks");
+      router.push("/feed");
     }, 1500);
   };
 
@@ -76,7 +76,7 @@ export default function CreateTask() {
       >
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/tasks" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <Link href="/feed" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
               <ArrowLeft size={20} />
             </Link>
             <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
@@ -220,7 +220,7 @@ export default function CreateTask() {
                   </button>
 
                   <Link
-                    href="/tasks"
+                    href="/feed"
                     className="flex-1 flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
                   >
                     <XCircle size={18} />
