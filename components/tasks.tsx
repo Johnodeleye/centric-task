@@ -46,7 +46,8 @@ export default function ClaimedTasks() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 4;
+  const limit = 6;
+  const [paginationLoading, setPaginationLoading] = useState(false); 
 
   // Get current user info
   useEffect(() => {
@@ -64,34 +65,43 @@ export default function ClaimedTasks() {
   }, []);
 
   // Fetch tasks from backend
+  const fetchTasks = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/my-tasks?page=${currentPage}&limit=${limit}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      if (!response.ok) throw new Error('Failed to fetch tasks');
+
+      const data = await response.json();
+      setTasks(data.tasks);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      toast.error('Failed to load tasks');
+    } finally {
+      setLoading(false);
+      setPaginationLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('No authentication token found');
-  
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/my-tasks?page=${currentPage}&limit=${limit}`,
-          { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-  
-        if (!response.ok) throw new Error('Failed to fetch tasks');
-  
-        const data = await response.json();
-        setTasks(data.tasks);
-        setTotalPages(data.totalPages);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        toast.error('Failed to load tasks');
-      } finally {
-        setLoading(false);
-      }
-    };
-  
     if (currentUserId) {
+      setLoading(true);
       fetchTasks();
     }
-  }, [currentUserId, currentPage]); 
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (currentUserId && currentPage !== 1) {
+      setPaginationLoading(true);
+      fetchTasks();
+    }
+  }, [currentPage, currentUserId]);
 
   const handleClaimTask = async (taskId: string) => {
     try {
@@ -385,32 +395,45 @@ export default function ClaimedTasks() {
       <div className="flex items-center gap-2">
         <button 
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
+          disabled={currentPage === 1 || paginationLoading}
           className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
         >
-          <ChevronLeft size={18} className="text-muted-foreground" />
+          {paginationLoading && currentPage > 1 ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <ChevronLeft size={18} className="text-muted-foreground" />
+          )}
         </button>
         
         {Array.from({ length: totalPages }, (_, i) => (
           <button
             key={i}
-            onClick={() => setCurrentPage(i + 1)}
+            onClick={() => !paginationLoading && setCurrentPage(i + 1)}
+            disabled={paginationLoading}
             className={`w-10 h-10 rounded-lg ${
               currentPage === i + 1 
                 ? 'bg-primary text-white dark:bg-primary dark:text-white' 
                 : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-muted-foreground'
-            } transition-colors`}
+            } transition-colors flex items-center justify-center`}
           >
-            {i + 1}
+            {paginationLoading && currentPage === i + 1 ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              i + 1
+            )}
           </button>
         ))}
         
         <button 
           onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
+          disabled={currentPage === totalPages || paginationLoading}
           className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
         >
-          <ChevronRight size={18} className="text-muted-foreground" />
+          {paginationLoading && currentPage < totalPages ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <ChevronRight size={18} className="text-muted-foreground" />
+          )}
         </button>
       </div>
     </div>
