@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Login from "@/components/Login";
+import AuthRedirect from "@/components/AuthRedirect";
 
 export const metadata: Metadata = {
   title: "Login | CentricTask",
@@ -7,5 +8,11 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return <Login />;
-}
+    return (
+      <>
+        <AuthRedirect requireAuth={false} />
+        <Login />
+    
+      </>
+    );
+  }

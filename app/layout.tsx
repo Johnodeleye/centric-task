@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import { ThemeProvider } from "../components/ThemeProvider";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Outfit ({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "CentricTask | Task Management Made Simple",
@@ -24,9 +17,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" suppressHydrationWarning  className="scroll-smooth">
+      <body  className={inter.className}>
         <ThemeProvider>
+        <Toaster
+      position="top-center"
+      toastOptions={{
+        style: {
+          background: "hsl(var(--background))",
+          color: "hsl(var(--foreground))",
+          border: "1px solid hsl(var(--border))",
+          
+        },
+        success: {
+          iconTheme: {
+            primary: "hsl(var(--primary))",
+            secondary: "hsl(var(--primary-foreground))",
+            
+          },
+          icon: '✅',
+        },
+        error: {
+          iconTheme: {
+            primary: "hsl(var(--destructive))",
+            secondary: "hsl(var(--destructive-foreground))",
+          },
+          icon: '❌',
+        },
+      }}
+    />
           {children}
         </ThemeProvider>
       </body>

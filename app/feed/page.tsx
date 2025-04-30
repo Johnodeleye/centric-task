@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import TaskFeed from "@/components/TaskFeed";
+import AuthRedirect from "@/components/AuthRedirect";
 
 export const metadata: Metadata = {
   title: "Task Feed | CentricTask",
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function FeedPage() {
-  return <TaskFeed />;
+  return( 
+    <>
+     <AuthRedirect requireAuth={true} />
+  <TaskFeed />
+  </>
+  )
 }

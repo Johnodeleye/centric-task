@@ -86,3 +86,6 @@ body {
 .dark .text-muted-foreground {
   color: rgb(156, 163, 175);
 }
+button{
+    cursor: pointer;
+}

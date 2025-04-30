@@ -1,4 +1,3 @@
-// components/CreateTask.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -10,13 +9,14 @@ import {
   Calendar,
   Text,
   FileText,
-  User,
   CheckCircle,
-  XCircle
+  XCircle,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "./NavBar";
+import toast from "react-hot-toast";
 
 export default function CreateTask() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function CreateTask() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
@@ -55,13 +55,40 @@ export default function CreateTask() {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Task created:", formData);
-      setIsSubmitting(false);
-      // Redirect to task feed after creation
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          budget: Number(formData.budget),
+          deadline: formData.deadline
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create task');
+      }
+
+      const createdTask = await response.json();
+      toast.success('Task created successfully!');
       router.push("/feed");
-    }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create task');
+      toast.error('Failed to create task');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
