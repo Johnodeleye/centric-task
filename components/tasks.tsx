@@ -331,43 +331,48 @@ export default function ClaimedTasks() {
 
                 <div className="border-t px-5 py-3 bg-gray-50 dark:bg-gray-700">
                   <div className="flex justify-between items-center">
-                    {task.isClaimed ? (
-                      task.claimedBy?._id === currentUserId ? (
-                        <button
-                          onClick={() => handleUnclaimTask(task._id)}
-                          className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 px-4 py-2 rounded-lg transition-colors"
-                        >
-                          <XCircle size={18} />
-                          Unclaim
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          {task.claimedBy?.avatar ? (
-                            <img
-                              src={task.claimedBy.avatar}
-                              alt={task.claimedBy.username}
-                              className="w-6 h-6 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-                              <User className="text-primary" size={12} />
-                            </div>
-                          )}
-                          <span className="text-sm text-red-500">
-                            Claimed by {task.claimedBy?.username || "someone"}
-                          </span>
-                        </div>
-                      )
-                    ) : (
-                      <button
-                        onClick={() => handleClaimTask(task._id)}
-                        className="flex items-center gap-2 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 px-4 py-2 rounded-lg transition-colors"
-                        disabled={task.createdBy._id === currentUserId}
-                      >
-                        <CheckCircle size={18} />
-                        Claim Task
-                      </button>
-                    )}
+            {task.isClaimed ? (
+              task.claimedBy?._id === currentUserId ? (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleUnclaimTask(task._id)}
+                    className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <XCircle size={18} />
+                    Unclaim
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {task.claimedBy?.avatar ? (
+                    <img
+                      src={task.claimedBy.avatar}
+                      alt={task.claimedBy.username}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                      <User className="text-primary dark:text-primary" size={12} />
+                    </div>
+                  )}
+                  <span className="text-sm text-red-500">
+                    Claimed by {task.claimedBy?.username || "someone"}
+                  </span>
+                </div>
+              )
+            ) : task.createdBy._id === currentUserId ? (
+              <span className="text-sm text-muted-foreground">
+                Waiting to be claimed
+              </span>
+            ) : (
+              <button
+                onClick={() => handleClaimTask(task._id)}
+                className="flex items-center gap-2 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 px-4 py-2 rounded-lg transition-colors"
+              >
+                <CheckCircle size={18} />
+                Claim Task
+              </button>
+            )}
                   </div>
                 </div>
               </motion.div>

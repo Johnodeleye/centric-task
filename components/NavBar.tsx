@@ -54,8 +54,10 @@ export function Navbar() {
     setIsAuthenticated(false);
     setUserData(null);
     toast.success('Logged out successfully');
-    router.push('/');
     setShowDropdown(false);
+    
+    // Force a full page reload and redirect to home
+    window.location.href = '/';
   };
 
   // Helper function to determine active link
