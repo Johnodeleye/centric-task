@@ -44,6 +44,9 @@ export default function ClaimedTasks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 4;
 
   // Get current user info
   useEffect(() => {
@@ -65,22 +68,18 @@ export default function ClaimedTasks() {
     const fetchTasks = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/my-tasks`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch tasks');
-        }
-
+        if (!token) throw new Error('No authentication token found');
+  
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/my-tasks?page=${currentPage}&limit=${limit}`,
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+  
+        if (!response.ok) throw new Error('Failed to fetch tasks');
+  
         const data = await response.json();
-        setTasks(data);
+        setTasks(data.tasks);
+        setTotalPages(data.totalPages);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
         toast.error('Failed to load tasks');
@@ -88,11 +87,11 @@ export default function ClaimedTasks() {
         setLoading(false);
       }
     };
-
+  
     if (currentUserId) {
       fetchTasks();
     }
-  }, [currentUserId]);
+  }, [currentUserId, currentPage]); 
 
   const handleClaimTask = async (taskId: string) => {
     try {
@@ -212,8 +211,8 @@ export default function ClaimedTasks() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
-        <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
-          <Loader2 className="animate-spin h-12 w-12 text-accent" />
+        <div className="container flex items-center justify-center h-64 px-4 py-8 mx-auto">
+          <Loader2 className="w-12 h-12 animate-spin text-accent" />
         </div>
       </div>
     );
@@ -223,11 +222,11 @@ export default function ClaimedTasks() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
-        <div className="container mx-auto px-4 py-8 text-center">
+        <div className="container px-4 py-8 mx-auto text-center">
           <p className="text-red-500">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 bg-accent text-white px-4 py-2 rounded-lg hover:bg-accent/90"
+            className="px-4 py-2 mt-4 text-white rounded-lg bg-accent hover:bg-accent/90"
           >
             Retry
           </button>
@@ -244,14 +243,14 @@ export default function ClaimedTasks() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="container mx-auto px-4 py-8"
+        className="container px-4 py-8 mx-auto"
       >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 mb-8 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
-            <Link href="/feed" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <Link href="/feed" className="p-2 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
               <ArrowLeft size={20} />
             </Link>
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <h1 className="flex items-center gap-2 text-2xl font-bold md:text-3xl">
               <CheckCircle className="text-accent" size={24} />
               <span>My Tasks</span>
             </h1>
@@ -262,19 +261,19 @@ export default function ClaimedTasks() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-12 bg-card dark:bg-gray-800 rounded-xl border"
+            className="py-12 text-center border bg-card dark:bg-gray-800 rounded-xl"
           >
             <p className="text-lg text-muted-foreground">
               No tasks found
             </p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {tasks.map((task) => (
               <motion.div
                 key={task._id}
                 whileHover={{ y: -5 }}
-                className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-card dark:bg-gray-800"
+                className="overflow-hidden transition-shadow border shadow-sm rounded-xl hover:shadow-md bg-card dark:bg-gray-800"
               >
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-4">
@@ -283,10 +282,10 @@ export default function ClaimedTasks() {
                         <img 
                           src={task.createdBy.avatar} 
                           alt={task.createdBy.username}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="object-cover w-10 h-10 rounded-full"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20">
                           <User className="text-primary" size={18} />
                         </div>
                       )}
@@ -300,7 +299,7 @@ export default function ClaimedTasks() {
                     {task.createdBy._id === currentUserId && (
                       <button
                         onClick={() => handleDeleteTask(task._id)}
-                        className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                        className="p-2 text-red-500 transition-colors rounded-full hover:bg-red-100 dark:hover:bg-red-900/20"
                         aria-label="Delete task"
                       >
                         <Trash2 size={18} />
@@ -308,10 +307,10 @@ export default function ClaimedTasks() {
                     )}
                   </div>
 
-                  <h3 className="text-xl font-semibold mb-2 text-secondary dark:text-secondary">
+                  <h3 className="mb-2 text-xl font-semibold text-secondary dark:text-secondary">
                     {task.title}
                   </h3>
-                  <p className="text-muted-foreground mb-4">{task.description}</p>
+                  <p className="mb-4 text-muted-foreground">{task.description}</p>
 
                   <div className="flex flex-col gap-3 mb-4">
                     <div className="flex items-center gap-2">
@@ -329,14 +328,14 @@ export default function ClaimedTasks() {
                   </div>
                 </div>
 
-                <div className="border-t px-5 py-3 bg-gray-50 dark:bg-gray-700">
-                  <div className="flex justify-between items-center">
+                <div className="px-5 py-3 border-t bg-gray-50 dark:bg-gray-700">
+                  <div className="flex items-center justify-between">
             {task.isClaimed ? (
               task.claimedBy?._id === currentUserId ? (
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleUnclaimTask(task._id)}
-                    className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 px-4 py-2 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-red-600 transition-colors bg-red-100 rounded-lg dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50"
                   >
                     <XCircle size={18} />
                     Unclaim
@@ -348,10 +347,10 @@ export default function ClaimedTasks() {
                     <img
                       src={task.claimedBy.avatar}
                       alt={task.claimedBy.username}
-                      className="w-6 h-6 rounded-full object-cover"
+                      className="object-cover w-6 h-6 rounded-full"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 dark:bg-primary/20">
                       <User className="text-primary dark:text-primary" size={12} />
                     </div>
                   )}
@@ -367,7 +366,7 @@ export default function ClaimedTasks() {
             ) : (
               <button
                 onClick={() => handleClaimTask(task._id)}
-                className="flex items-center gap-2 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-teal-600 transition-colors bg-teal-100 rounded-lg dark:bg-teal-900/30 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50"
               >
                 <CheckCircle size={18} />
                 Claim Task
@@ -382,23 +381,40 @@ export default function ClaimedTasks() {
 
         {/* PAGINATION */}
         {tasks.length > 0 && (
-          <div className="flex justify-center mt-10">
-            <div className="flex items-center gap-2">
-              <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <ChevronLeft size={18} className="text-muted-foreground" />
-              </button>
-              <button className="w-10 h-10 rounded-lg bg-primary text-white dark:bg-primary dark:text-white">
-                1
-              </button>
-              <button className="w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-muted-foreground">
-                2
-              </button>
-              <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <ChevronRight size={18} className="text-muted-foreground" />
-              </button>
-            </div>
-          </div>
-        )}
+    <div className="flex justify-center mt-10">
+      <div className="flex items-center gap-2">
+        <button 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+        >
+          <ChevronLeft size={18} className="text-muted-foreground" />
+        </button>
+        
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`w-10 h-10 rounded-lg ${
+              currentPage === i + 1 
+                ? 'bg-primary text-white dark:bg-primary dark:text-white' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-muted-foreground'
+            } transition-colors`}
+          >
+            {i + 1}
+          </button>
+        ))}
+        
+        <button 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+        >
+          <ChevronRight size={18} className="text-muted-foreground" />
+        </button>
+      </div>
+    </div>
+  )}
       </motion.main>
     </div>
   );
