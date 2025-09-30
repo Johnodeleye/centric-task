@@ -24,7 +24,7 @@ export function HeroSection() {
         className="inline-flex items-center gap-2 bg-primary dark:bg-primary text-secondary-text dark:text-white px-4 py-2 rounded-full mb-6"
       >
         <Rocket size={18} />
-        <span>Introducing CentricTask</span>
+        <span>Introducing HubPostTask</span>
       </motion.div>
 
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6">

@@ -30,7 +30,7 @@ export function Footer() {
           viewport={{ once: true }}
           className="border-t border-white/10 dark:border-white/20 mt-12 pt-8 text-center text-text-light"
         >
-          <p>© {new Date().getFullYear()} CentricTask. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} HubPostTask. All rights reserved.</p>
           <p className="mt-2 flex items-center justify-center gap-1">
             Made with <Heart size={16} className="text-red-500 fill-red-500" /> by John Odeleye (P-DEV)
           </p>

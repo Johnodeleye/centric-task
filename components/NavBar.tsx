@@ -82,7 +82,7 @@ export function Navbar() {
     >
       <div className="flex-1">
         <Link href="/" className="text-xl md:text-2xl font-bold text-primary">
-          Centric<span className="text-accent">Task</span>
+          HubPost<span className="text-accent">Task</span>
         </Link>
       </div>
       

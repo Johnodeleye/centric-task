@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 const inter = Outfit ({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "CentricTask | Task Management Made Simple",
+  title: "HubPostTask | Task Management Made Simple",
   description: "The ultimate task management solution for teams and individuals.",
 };
 

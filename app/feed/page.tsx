@@ -3,7 +3,7 @@ import TaskFeed from "@/components/TaskFeed";
 import AuthRedirect from "@/components/AuthRedirect";
 
 export const metadata: Metadata = {
-  title: "Task Feed | CentricTask",
+  title: "Task Feed | HubPostTask",
   description: "Browse and claim available tasks",
 };
 
